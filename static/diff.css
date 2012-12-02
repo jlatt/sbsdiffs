@@ -1,29 +1,20 @@
-html, body { height: 100%; }
-
-.contents {
-    position: absolute;
-    font-family: monospace;
-    width: 50%;
-    overflow-x: auto;
-}
-
-.head {
-    right: 0;
-}
-
 .lines {
     float: left;
-    min-width: 100%;
+    font-family: monospace;
 }
 
 .line {
     white-space: pre;
 }
 
-.add {
+.head .highlight {
     background: lightgreen;
 }
 
-.del {
+.base .highlight {
     background: pink;
+}
+
+.lines .blank {
+    background: #ddd;
 }

@@ -21,7 +21,7 @@ github_consumer_secret = os.environ['GITHUB_CONSUMER_SECRET']
 @app.route('/login')
 def login():
     redirect_uri = flask.request.args.get('redirect_uri', None)
-    if redirect_uri:
+    if redirect_uri and redirect_uri.startswith(flask.request.url_root):
         flask.session['redirect_uri'] = redirect_uri
     return flask.redirect(github.authorize_url(github_consumer_key))
 
@@ -66,7 +66,7 @@ def compare_file(owner, repo, base, head, filename):
     access_token = flask.session['access_token']
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
-    base_data, head_data = udiff.parse_patch(file_data['patch'])
+    base_data, head_data, base_alt, head_alt = udiff.parse_patch(file_data['patch'])
     base_lines = github.raw(owner=owner, repo=repo, sha=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
     head_lines = github.raw(owner=owner, repo=repo, sha=head, filename=filename, access_token=access_token)
 
@@ -74,8 +74,8 @@ def compare_file(owner, repo, base, head, filename):
     return flask.render_template(
         'diff.html',
         filename=filename,
-        base_html=formatter.format_code(filename, base_lines, lambda ln: 'del' if ln in base_data else 'reg'),
-        head_html=formatter.format_code(filename, head_lines, lambda ln: 'add' if ln in head_data else 'reg'),
+        base_html=formatter.format_code(filename, base_lines, base_data, base_alt),
+        head_html=formatter.format_code(filename, head_lines, head_data, head_alt),
         compare=response)
 
 
