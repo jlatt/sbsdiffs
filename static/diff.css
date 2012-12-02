@@ -1,0 +1,29 @@
+html, body { height: 100%; }
+
+.contents {
+    position: absolute;
+    font-family: monospace;
+    width: 50%;
+    overflow-x: auto;
+}
+
+.head {
+    right: 0;
+}
+
+.lines {
+    float: left;
+    min-width: 100%;
+}
+
+.line {
+    white-space: pre;
+}
+
+.add {
+    background: lightgreen;
+}
+
+.del {
+    background: pink;
+}

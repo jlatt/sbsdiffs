@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Side-by-Side Diffs</title>
+    <link rel="stylesheet" type="text/css" href="/static/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/static/diff.css">
+  </head>
+  <body>
+    <h1>Compare</h1>
+    <ul>
+      {% for file in files %}
+        <li><a href="{{ file.filename }}">{{ file.filename }}</a></li>
+      {% endfor %}
+    </ul>
+
+    <script>this.compare = {{ compare|tojson|safe }};</script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Side-by-Side Diffs</title>
+    <link rel="stylesheet" type="text/css" href="/static/normalize.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/diff.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/pygments.css"/>
+  </head>
+  <body>
+    <h1>{{ filename }}</h1>
+
+    <div class="base contents">
+      <div class="lines">
+        {{ base_html|safe }}
+      </div>
+    </div>
+    
+    <div class="head contents">
+      <div class="lines">
+        {{ head_html|safe }}
+      </div>
+    </div>
+  </body>
+</html>
