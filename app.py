@@ -14,7 +14,6 @@ def check_access_token(func):
     def checks_access_token(*args, **kwargs):
         if 'access_token' not in flask.session:
             return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
-        args.append(flask.session['access_token'])
         return func(*args, **kwargs)
     return checks_access_token
 
@@ -27,41 +26,46 @@ app.secret_key = app_config.flask_secret_key
 @app.route('/login')
 def login():
     redirect_uri = flask.request.args.get('redirect_uri', None)
-    return flask.redirect(github.authorize_url(redirect_uri))
+    if redirect_uri:
+        flask.session['redirect_uri'] = redirect_uri
+    return flask.redirect(github.authorize_url(app_config.consumer_key))
 
 
 @app.route('/oauth/authorize')
 def oauth_authorize():
     code = flask.request.args.get('code', None)
+    if not code:
+        return flask.abort(403)
 
     access_token = github.get_access_token(app_config.consumer_key, app_config.consumer_secret, code)
     flask.session['access_token'] = access_token
 
-    redirect_uri = flask.request.args.get('redirect_uri', None)
-    if not redirect_uri.startswith(flask.request.url_root):
+    redirect_uri = flask.session.pop('redirect_uri', None)
+    if not (redirect_uri and redirect_uri.startswith(flask.request.url_root)):
         redirect_uri = flask.url_for('root')
     return flask.redirect(redirect_uri)
 
 
-@app.route('/')
 @check_access_token
-def root(access_token):
+@app.route('/')
+def root():
     return 'authorized. try a url.'
 
 
-@app.route('/<owner>/<repo>/<base>/<head>/')
 @check_access_token
+@app.route('/<owner>/<repo>/<base>/<head>/')
 def compare(owner, repo, base, head):
-    response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
+    response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=flask.session['access_token'])
     return flask.render_template(
         'index.html',
         files=response['files'],
         compare=response)
 
 
-@app.route('/<owner>/<repo>/<base>/<head>/<path:filename>')
 @check_access_token
-def compare_file(owner, repo, base, head, filename, access_token):
+@app.route('/<owner>/<repo>/<base>/<head>/<path:filename>')
+def compare_file(owner, repo, base, head, filename):
+    access_token = flask.session['access_token']
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
     base_data, head_data = udiff.parse_patch(file_data['patch'])

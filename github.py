@@ -2,8 +2,6 @@ import urllib
 import urllib2
 import json
 
-import app_config
-
 
 # utility
 
@@ -32,10 +30,8 @@ def get_access_token(consumer_key, consumer_secret, code):
     response = json.load(urllib2.urlopen(request))
     return response['access_token']
 
-def authorize_url(redirect_uri):
-    return 'https://github.com/login/oauth/authorize?' + urllib.urlencode(
-        ('client_id', app_config.consumer_key),
-        ('redirect_uri', redirect_uri))
+def authorize_url(client_id):
+    return 'https://github.com/login/oauth/authorize?' + urllib.urlencode({'client_id': client_id})
 
 # API
 
@@ -49,4 +45,7 @@ def tree(**kwargs):
     return get_json(construct_url('/repos/%(owner)s/%(repo)s/git/trees/%(sha)s', kwargs))
 
 def raw(**kwargs):
-    return get_text(construct_url('/%(owner)s/%(repo)s/raw/%(sha)s/%(filename)s', kwargs, base_url='https://github.com'))
+    try:
+        return get_text(construct_url('/%(owner)s/%(repo)s/raw/%(sha)s/%(filename)s', kwargs, base_url='https://github.com'))
+    except urllib2.HTTPError:
+        return ''
