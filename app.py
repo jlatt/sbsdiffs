@@ -33,10 +33,14 @@ def login():
 @app.route('/oauth/authorize')
 def oauth_authorize():
     code = flask.request.args.get('code', None)
+
     access_token = github.get_access_token(app_config.consumer_key, app_config.consumer_secret, code)
-    response = flask.redirect(flask.url_for('root'))
     flask.session['access_token'] = access_token
-    return response
+
+    redirect_uri = flask.request.args.get('redirect_uri', None)
+    if not redirect_uri.startswith(flask.request.url_root):
+        redirect_uri = flask.url_for('root')
+    return flask.redirect(redirect_uri)
 
 
 @app.route('/')
