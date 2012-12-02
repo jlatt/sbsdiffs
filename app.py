@@ -1,10 +1,10 @@
 #!/usr/bin/env python2.7
 import collections
 import itertools
+import os
 
 import flask
 
-import app_config
 import formatter
 import github
 import udiff
@@ -12,7 +12,10 @@ import udiff
 
 # flask
 app = flask.Flask(__name__)
-app.secret_key = app_config.flask_secret_key
+app.secret_key = os.environ['FLASK_SESSION_KEY']
+#.decode('base64')
+github_consumer_key = os.environ['GITHUB_CONSUMER_KEY']
+github_consumer_secret = os.environ['GITHUB_CONSUMER_SECRET']
 
 
 @app.route('/login')
@@ -20,7 +23,7 @@ def login():
     redirect_uri = flask.request.args.get('redirect_uri', None)
     if redirect_uri:
         flask.session['redirect_uri'] = redirect_uri
-    return flask.redirect(github.authorize_url(app_config.consumer_key))
+    return flask.redirect(github.authorize_url(github_consumer_key))
 
 
 @app.route('/oauth/authorize')
@@ -29,7 +32,7 @@ def oauth_authorize():
     if not code:
         return flask.abort(403)
 
-    access_token = github.get_access_token(app_config.consumer_key, app_config.consumer_secret, code)
+    access_token = github.get_access_token(github_consumer_key, github_consumer_secret, code)
     flask.session['access_token'] = access_token
 
     redirect_uri = flask.session.pop('redirect_uri', None)
