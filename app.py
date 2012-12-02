@@ -49,7 +49,7 @@ def compare_file(owner, repo, base, head, filename):
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
     base_data, head_data = udiff.parse_patch(file_data['patch'])
-    base_lines = github.raw(owner=owner, repo=repo, sha=base, filename=filename, access_token=access_token)
+    base_lines = github.raw(owner=owner, repo=repo, sha=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
     head_lines = github.raw(owner=owner, repo=repo, sha=head, filename=filename, access_token=access_token)
 
     # render
@@ -57,13 +57,13 @@ def compare_file(owner, repo, base, head, filename):
         'diff.html',
         filename=filename,
         base_html=formatter.format_code(filename, base_lines, lambda ln: 'del' if ln in base_data else 'reg'),
-        head_html=formatter.format_code(filename, head_lines, lambda ln: 'add' if ln in head_data else 'reg'))
+        head_html=formatter.format_code(filename, head_lines, lambda ln: 'add' if ln in head_data else 'reg'),
+        compare=response)
 
 
 if __name__ == '__main__':
     import os
 
-
-    # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    debug = port == 5000
+    app.run(host='0.0.0.0', port=port, debug=debug)
