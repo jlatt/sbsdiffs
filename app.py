@@ -10,14 +10,6 @@ import github
 import udiff
 
 
-def check_access_token(func):
-    def checks_access_token(*args, **kwargs):
-        if 'access_token' not in flask.session:
-            return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
-        return func(*args, **kwargs)
-    return checks_access_token
-
-
 # flask
 app = flask.Flask(__name__)
 app.secret_key = app_config.flask_secret_key
@@ -46,15 +38,17 @@ def oauth_authorize():
     return flask.redirect(redirect_uri)
 
 
-@check_access_token
 @app.route('/')
 def root():
+    if 'access_token' not in flask.session:
+        return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
     return 'authorized. try a url.'
 
 
-@check_access_token
 @app.route('/<owner>/<repo>/<base>/<head>/')
 def compare(owner, repo, base, head):
+    if 'access_token' not in flask.session:
+        return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=flask.session['access_token'])
     return flask.render_template(
         'index.html',
@@ -62,9 +56,10 @@ def compare(owner, repo, base, head):
         compare=response)
 
 
-@check_access_token
 @app.route('/<owner>/<repo>/<base>/<head>/<path:filename>')
 def compare_file(owner, repo, base, head, filename):
+    if 'access_token' not in flask.session:
+        return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
     access_token = flask.session['access_token']
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
