@@ -76,7 +76,8 @@ def compare_file(owner, repo, base, head, filename):
         filename=filename,
         base_html=formatter.format_code(filename, base_lines, base_data, base_alt),
         head_html=formatter.format_code(filename, head_lines, head_data, head_alt),
-        compare=response)
+        compare=response,
+        patch=file_data['patch'])
 
 
 if __name__ == '__main__':

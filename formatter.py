@@ -16,10 +16,9 @@ class CodeHtmlFormatter(pygments.formatters.HtmlFormatter):
         return 'highlight' if lineno in self.highlight_data else 'reg'
 
     def _wrap_code(self, source):
-        lineno = 0
+        lineno = 1
         for i, t in source:
             if i == 1:
-                lineno += 1
                 for _ in xrange(self.blank_data[lineno]):
                     yield 0, '<div class="blank">&nbsp;</div>'
                 yield 0, '<div class="line %s">' % self.lineno_cls(lineno)
@@ -28,6 +27,7 @@ class CodeHtmlFormatter(pygments.formatters.HtmlFormatter):
 
             if i == 1:
                 yield 0, '</div>'
+                lineno += 1
 
 def format_code(filename, code, highlight_data, blank_data):
     try:

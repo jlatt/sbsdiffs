@@ -18,3 +18,7 @@
 .lines .blank {
     background: #ddd;
 }
+
+.patch {
+    display: none;
+}
