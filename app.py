@@ -10,13 +10,24 @@ import github
 import udiff
 
 
+def check_access_token(func):
+    def checks_access_token(*args, **kwargs):
+        if 'access_token' not in flask.session:
+            return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
+        args.append(flask.session['access_token'])
+        return func(*args, **kwargs)
+    return checks_access_token
+
+
 # flask
 app = flask.Flask(__name__)
+app.secret_key = app_config.flask_secret_key
 
 
 @app.route('/login')
 def login():
-    return flask.redirect('https://github.com/login/oauth/authorize?client_id=%s' % app_config.consumer_key)
+    redirect_uri = flask.request.args.get('redirect_uri', None)
+    return flask.redirect('https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s' % (app_config.consumer_key, redirect_uri))
 
 
 @app.route('/oauth/authorize')
@@ -24,18 +35,19 @@ def oauth_authorize():
     code = flask.request.args.get('code', None)
     access_token = github.get_access_token(app_config.consumer_key, app_config.consumer_secret, code)
     response = flask.redirect(flask.url_for('root'))
-    response.set_cookie('access_token', access_token)
+    flask.session['access_token'] = access_token
     return response
 
 
 @app.route('/')
-def root():
-    return ''
+@check_access_token
+def root(access_token):
+    return 'authorized. try a url.'
 
 
 @app.route('/<owner>/<repo>/<base>/<head>/')
+@check_access_token
 def compare(owner, repo, base, head):
-    access_token = flask.request.cookies['access_token']
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     return flask.render_template(
         'index.html',
@@ -44,8 +56,8 @@ def compare(owner, repo, base, head):
 
 
 @app.route('/<owner>/<repo>/<base>/<head>/<path:filename>')
-def compare_file(owner, repo, base, head, filename):
-    access_token = flask.request.cookies['access_token']
+@check_access_token
+def compare_file(owner, repo, base, head, filename, access_token):
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
     base_data, head_data = udiff.parse_patch(file_data['patch'])
