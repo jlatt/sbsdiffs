@@ -2,6 +2,8 @@ import urllib
 import urllib2
 import json
 
+import app_config
+
 
 # utility
 
@@ -29,6 +31,11 @@ def get_access_token(consumer_key, consumer_secret, code):
     request = urllib2.Request('https://github.com/login/oauth/access_token', data, {'Accept': 'application/json'})
     response = json.load(urllib2.urlopen(request))
     return response['access_token']
+
+def authorize_url(redirect_uri):
+    return 'https://github.com/login/oauth/authorize?' + urllib.urlencode(
+        ('client_id', app_config.consumer_key),
+        ('redirect_uri', redirect_uri))
 
 # API
 

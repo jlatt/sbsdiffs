@@ -27,7 +27,7 @@ app.secret_key = app_config.flask_secret_key
 @app.route('/login')
 def login():
     redirect_uri = flask.request.args.get('redirect_uri', None)
-    return flask.redirect('https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s' % (app_config.consumer_key, redirect_uri))
+    return flask.redirect(github.authorize_url(redirect_uri))
 
 
 @app.route('/oauth/authorize')
