@@ -59,10 +59,9 @@ def compare(owner, repo, base, head):
         compare=response)
 
 
-
 def parse_owner(ref, owner):
     if ref.find(':') != -1:
-        return tuple(ref.split(':', 1))
+        return tuple(reversed(ref.split(':', 1)))
     return ref, owner
 
 
@@ -70,6 +69,7 @@ def parse_owner(ref, owner):
 def compare_file(owner, repo, base, head, filename):
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
+
     access_token = flask.session['access_token']
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
