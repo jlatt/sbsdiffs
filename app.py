@@ -59,6 +59,13 @@ def compare(owner, repo, base, head):
         compare=response)
 
 
+
+def parse_owner(ref, owner):
+    if ref.find(':') != -1:
+        return tuple(ref.split(':', 1))
+    return ref, owner
+
+
 @app.route('/<owner>/<repo>/<base>/<head>/<path:filename>')
 def compare_file(owner, repo, base, head, filename):
     if 'access_token' not in flask.session:
@@ -66,9 +73,14 @@ def compare_file(owner, repo, base, head, filename):
     access_token = flask.session['access_token']
     response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
+
     base_data, head_data, base_alt, head_alt = udiff.parse_patch(file_data['patch'])
-    base_lines = github.raw(owner=owner, repo=repo, sha=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
-    head_lines = github.raw(owner=owner, repo=repo, sha=head, filename=filename, access_token=access_token)
+
+    base, base_owner = parse_owner(base, owner)
+    base_lines = github.raw(owner=base_owner, repo=repo, sha=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
+
+    head, head_owner = parse_owner(head, owner)
+    head_lines = github.raw(owner=head_owner, repo=repo, sha=head, filename=filename, access_token=access_token)
 
     # render
     return flask.render_template(
