@@ -1,10 +1,11 @@
 .lines {
     float: left;
     font-family: monospace;
+    width: 50%;
 }
 
 .line {
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
 .head .highlight {
