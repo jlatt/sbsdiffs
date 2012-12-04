@@ -46,6 +46,6 @@ def tree(**kwargs):
 
 def raw(**kwargs):
     try:
-        return get_text(construct_url('/%(owner)s/%(repo)s/raw/%(sha)s/%(filename)s', kwargs, base_url='https://github.com'))
+        return get_text(construct_url('/%(owner)s/%(repo)s/%(sha)s/%(filename)s', kwargs, base_url='https://raw.github.com'))
     except urllib2.HTTPError:
         return ''
