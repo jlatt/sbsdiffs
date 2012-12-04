@@ -77,17 +77,17 @@ def compare_file(owner, repo, base, head, filename):
     base_data, head_data, base_alt, head_alt = udiff.parse_patch(file_data['patch'])
 
     base, base_owner = parse_owner(base, owner)
-    base_lines = github.raw(owner=base_owner, repo=repo, sha=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
+    base_contents = github.contents(owner=base_owner, repo=repo, ref=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
 
     head, head_owner = parse_owner(head, owner)
-    head_lines = github.raw(owner=head_owner, repo=repo, sha=head, filename=filename, access_token=access_token)
+    head_contents = github.contents(owner=head_owner, repo=repo, ref=head, filename=filename, access_token=access_token)
 
     # render
     return flask.render_template(
         'diff.html',
         filename=filename,
-        base_html=formatter.format_code(filename, base_lines, base_data, base_alt),
-        head_html=formatter.format_code(filename, head_lines, head_data, head_alt),
+        base_html=formatter.format_code(filename, base_contents, base_data, base_alt),
+        head_html=formatter.format_code(filename, head_contents, head_data, head_alt),
         compare=response,
         patch=file_data['patch'])
 
