@@ -51,7 +51,9 @@ def root():
 def compare(owner, repo, base, head):
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
-    response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=flask.session['access_token'])
+    gh = github.Github(owner, repo, access_token=flask.session['access_token'])
+
+    response = gh.compare(base, head)
     return flask.render_template(
         'index.html',
         files=response['files'],
@@ -69,19 +71,17 @@ def compare_file(owner, repo, base, head, filename):
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
 
-    access_token = flask.session['access_token']
-    response = github.compare(owner=owner, repo=repo, base=base, head=head, access_token=access_token)
+    gh = github.Github(owner, repo, flask.session['access_token'])
+
+    response = gh.compare(base, head)
     file_data = itertools.ifilter(lambda f: f['filename'] == filename, response['files']).next()
 
     base_data, head_data, base_alt, head_alt = udiff.parse_patch(file_data['patch'])
-
-    base, base_owner = parse_owner(base, owner)
-    base_contents = github.contents(owner=base_owner, repo=repo, ref=response['merge_base_commit']['sha'], filename=filename, access_token=access_token)
-
     head, head_owner = parse_owner(head, owner)
-    head_contents = github.contents(owner=head_owner, repo=repo, ref=head, filename=filename, access_token=access_token)
 
-    # render
+    base_contents = gh.contents(filename, response['merge_base_commit']['sha'])
+    head_contents = gh.contents(filename, head)
+
     return flask.render_template(
         'diff.html',
         filename=filename,
