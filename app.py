@@ -13,7 +13,6 @@ import udiff
 # flask
 app = flask.Flask(__name__)
 app.secret_key = os.environ['FLASK_SESSION_KEY']
-#.decode('base64')
 github_consumer_key = os.environ['GITHUB_CONSUMER_KEY']
 github_consumer_secret = os.environ['GITHUB_CONSUMER_SECRET']
 
@@ -45,7 +44,7 @@ def oauth_authorize():
 def root():
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
-    return 'authorized. try a url.'
+    return 'authorized. try a url, like /user/repo/from_branch/to_branch/.'
 
 
 @app.route('/<owner>/<repo>/<base>/<head>/')
@@ -93,8 +92,6 @@ def compare_file(owner, repo, base, head, filename):
 
 
 if __name__ == '__main__':
-    import os
-
     port = int(os.environ.get('PORT', 5000))
     debug = port == 5000
     app.run(host='0.0.0.0', port=port, debug=debug)
