@@ -13,6 +13,7 @@ import udiff
 # flask
 app = flask.Flask(__name__)
 app.secret_key = os.environ['FLASK_SESSION_KEY']
+
 github_consumer_key = os.environ['GITHUB_CONSUMER_KEY']
 github_consumer_secret = os.environ['GITHUB_CONSUMER_SECRET']
 
@@ -47,16 +48,21 @@ def root():
     return 'authorized. try a url, like /user/repo/from_branch/to_branch/.'
 
 
-@app.route('/<owner>/<repo>/<base>/<head>/')
-def compare(owner, repo, base, head):
+@app.route('/<owner>/<repo>')
+def compare(owner, repo):
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
-    gh = github.Github(owner, repo, access_token=flask.session['access_token'])
 
+    base = flask.request.args['base']
+    head = flask.request.args['head']
+
+    gh = github.Github(owner, repo, access_token=flask.session['access_token'])
     response = gh.compare(base, head)
+
+    files = [dict(text=fdata['filename'], href=flask.url_for('compare_file', owner=owner, repo=repo, filename=fdata['filename'], base=base, head=head)) for fdata in response['files'] if 'patch' in fdata]
     return flask.render_template(
         'index.html',
-        files=response['files'],
+        files=files,
         compare=response)
 
 
@@ -66,11 +72,13 @@ def parse_owner(ref, owner):
     return ref, owner
 
 
-@app.route('/<owner>/<repo>/<base>/<head>/<path:filename>')
-def compare_file(owner, repo, base, head, filename):
+@app.route('/<owner>/<repo>/<path:filename>')
+def compare_file(owner, repo, filename):
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
 
+    base = flask.request.args['base']
+    head = flask.request.args['head']
     gh = github.Github(owner, repo, flask.session['access_token'])
 
     response = gh.compare(base, head)

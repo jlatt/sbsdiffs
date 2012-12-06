@@ -9,7 +9,7 @@
     <h1>Compare</h1>
     <ul>
       {% for file in files %}
-        <li><a href="{{ file.filename }}">{{ file.filename }}</a></li>
+        <li><a href="{{ file.href }}">{{ file.text }}</a></li>
       {% endfor %}
     </ul>
 

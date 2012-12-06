@@ -36,8 +36,11 @@ class Github(object):
         url = base_url + make_path('/repos/%(owner)s/%(repo)s/contents/%(filename)s', owner=self.owner, repo=self.repo, filename=filename) + make_query(access_token=self.access_token, ref=ref)
         request = urllib2.Request(url)
         request.add_header('Accept', 'application/vnd.github.v3.raw')
-        response = urllib2.urlopen(request)
-        return response.read()
+        try:
+            response = urllib2.urlopen(request)
+            return response.read()
+        except urllib2.HTTPError:
+            return ''
 
 
 # oauth
