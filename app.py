@@ -45,7 +45,10 @@ def oauth_authorize():
 def root():
     if 'access_token' not in flask.session:
         return flask.redirect(flask.url_for('login', redirect_uri=flask.request.url))
-    return 'authorized. try a url, like /user/repo/from_branch/to_branch/.'
+    return flask.render_template(
+        'root.html',
+        url_example=flask.url_for('compare', owner='owner', repo='repo', base='from_commitish', head='to_commitish')
+        )
 
 
 @app.route('/<owner>/<repo>')
@@ -62,6 +65,10 @@ def compare(owner, repo):
     files = [dict(text=fdata['filename'], href=flask.url_for('compare_file', owner=owner, repo=repo, filename=fdata['filename'], base=base, head=head)) for fdata in response['files'] if 'patch' in fdata]
     return flask.render_template(
         'index.html',
+        owner=owner,
+        repo=repo,
+        base=base,
+        head=head,
         files=files,
         compare=response)
 
@@ -92,9 +99,14 @@ def compare_file(owner, repo, filename):
 
     return flask.render_template(
         'diff.html',
+        owner=owner,
+        repo=repo,
+        base=base,
+        head=head,
         filename=filename,
         base_html=formatter.format_code(filename, base_contents, base_data, base_alt),
         head_html=formatter.format_code(filename, head_contents, head_data, head_alt),
+        compare_url=flask.url_for('compare', owner=owner, repo=repo, base=base, head=head),
         compare=response,
         patch=file_data['patch'])
 

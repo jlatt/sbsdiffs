@@ -1,15 +1,16 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Side-by-Side Diffs</title>
+    <title>Side-by-Side Diffs | {{ owner }}/{{ repo }} | {{ base }}...{{ head }}</title>
     <link rel="stylesheet" type="text/css" href="/static/normalize.css">
     <link rel="stylesheet" type="text/css" href="/static/diff.css">
   </head>
   <body>
-    <h1>Compare</h1>
+    <h1><code>{{ owner }}/{{ repo }}</code></h1>
+    <h2><code>{{ base }}...{{ head }}</code></h1>
     <ul>
       {% for file in files %}
-        <li><a href="{{ file.href }}">{{ file.text }}</a></li>
+        <li><a href="{{ file.href }}"><code>{{ file.text }}</code></a></li>
       {% endfor %}
     </ul>
 

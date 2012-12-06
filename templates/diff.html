@@ -1,12 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Side-by-Side Diffs</title>
+    <title>Side-by-Side Diffs | {{ owner }}/{{ repo }} | {{ base }}...{{ head }} | {{ filename }}</title>
     <link rel="stylesheet" type="text/css" href="/static/normalize.css"/>
     <link rel="stylesheet" type="text/css" href="/static/diff.css"/>
     <link rel="stylesheet" type="text/css" href="/static/pygments.css"/>
   </head>
   <body>
+    <h1><code>{{ owner }}/{{ repo }}</code></h1>
+    <h2><a href="{{ compare_url }}"><code>{{ base }}...{{ head }}</code></a></h1>
     <h1>{{ filename }}</h1>
 
     <div class="base lines">
