@@ -10,7 +10,12 @@
     <h2><code>{{ base }}...{{ head }}</code></h1>
     <ul>
       {% for file in files %}
-        <li><a href="{{ file.href }}"><code>{{ file.text }}</code></a></li>
+        <li>
+          <a href="{{ file.href }}"><code>{{ file.text }}</code></a>
+          <span>{{ file.changes }} change{% if file.changes != 1 %}s{% endif %}:</span>
+          {% if file.additions %}+{{ file.additions }}</span>{% endif %}
+          {% if file.deletions %}-{{ file.deletions }}</span>{% endif %}
+        </li>
       {% endfor %}
     </ul>
 

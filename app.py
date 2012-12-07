@@ -62,7 +62,13 @@ def compare(owner, repo):
     gh = github.Github(owner, repo, access_token=flask.session['access_token'])
     response = gh.compare(base, head)
 
-    files = [dict(text=fdata['filename'], href=flask.url_for('compare_file', owner=owner, repo=repo, filename=fdata['filename'], base=base, head=head)) for fdata in response['files'] if 'patch' in fdata]
+    files = [dict(
+            text=fdata['filename'],
+            href=flask.url_for('compare_file', owner=owner, repo=repo, filename=fdata['filename'], base=base, head=head),
+            changes=fdata['changes'],
+            additions=fdata['additions'],
+            deletions=fdata['deletions'],
+            ) for fdata in response['files'] if 'patch' in fdata]
     return flask.render_template(
         'index.html',
         owner=owner,
