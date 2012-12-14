@@ -32,8 +32,10 @@ class Github(object):
         return json_response
 
 
-    def contents(self, filename, ref):
-        url = base_url + make_path('/repos/%(owner)s/%(repo)s/contents/%(filename)s', owner=self.owner, repo=self.repo, filename=filename) + make_query(access_token=self.access_token, ref=ref)
+    def contents(self, filename, ref, owner=None):
+        if owner is None:
+            owner = self.owner
+        url = base_url + make_path('/repos/%(owner)s/%(repo)s/contents/%(filename)s', owner=owner, repo=self.repo, filename=filename) + make_query(access_token=self.access_token, ref=ref)
         request = urllib2.Request(url)
         request.add_header('Accept', 'application/vnd.github.v3.raw')
         try:

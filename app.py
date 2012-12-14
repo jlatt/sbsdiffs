@@ -99,9 +99,10 @@ def compare_file(owner, repo, filename):
 
     base_data, head_data, base_alt, head_alt = udiff.parse_patch(file_data['patch'])
     head, head_owner = parse_owner(head, owner)
+    base, base_owner = parse_owner(base, owner)
 
-    base_contents = gh.contents(filename, response['merge_base_commit']['sha'])
-    head_contents = gh.contents(filename, head)
+    base_contents = gh.contents(filename, response['merge_base_commit']['sha'], owner=base_owner)
+    head_contents = gh.contents(filename, head, owner=head_owner)
 
     return flask.render_template(
         'diff.html',
